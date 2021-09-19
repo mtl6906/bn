@@ -79,6 +79,7 @@ string transacation(const string &method, const string &url, const string &body 
 		try
 		{
 			auto text = in.split(contentLength);
+			LOGGER(ls::INFO) << "body split ok" << ls::endl;
 			return text;
 		}
 		catch(Exception &e)
