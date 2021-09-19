@@ -18,9 +18,9 @@
 using namespace ls;
 using namespace std;
 
-char *ip, *url, *secretKey, *apiKey, *coin;
+char *ip, *url, *secretKey, *apiKey, *coinname;
 double rate, uprate;
-double number;
+double coinnumber;
 
 io::InputStream in(nullptr, new Buffer());
 io::OutputStream out(nullptr, new Buffer());
@@ -55,40 +55,8 @@ string transacation(const string &method, const string &url, const string &body 
 	LOGGER(ls::INFO) << "cmd sending..." << ls::endl;
 
 	in.reset(connection -> getReader());
-
-	http::Response response;
-	for(;;)
-	{
-		in.read();
-		LOGGER(ls::INFO) << "reading..." << ls::endl;
-		if(response.getCode() == "")
-		{
-			try
-			{
-				string responseText = in.split("\r\n\r\n", true);
-				response.parseFrom(responseText);
-				LOGGER(ls::INFO) << "parse header ok" << ls::endl;
-			}
-			catch(Exception &e)
-			{
-				sleep(1);
-				continue;	
-			}
-		}
-		auto contentLength = stoi(response.getAttribute("Content-Length"));
-		try
-		{
-			auto text = in.split(contentLength);
-			LOGGER(ls::INFO) << "body split ok" << ls::endl;
-			return text;
-		}
-		catch(Exception &e)
-		{
-			
-		}
-		sleep(1);
-	}
-	return "";
+	in.split("\r\n\r\n");
+	return in.split();
 }
 
 vector<double> getPrice(const string &coin)
@@ -189,7 +157,7 @@ double round2(double value)
 	return v / 100.0;
 }
 
-void method()
+void method(const string &coin, double number)
 {
 	for(;;)
 	{
@@ -224,12 +192,12 @@ int main(int argc, char **argv)
 	secretKey = argv[4];
 	rate = stod(argv[5]);
 	uprate = stod(argv[6]);
-	coin = argv[7];
-	number = stod(argv[8]);
+	coinname = argv[7];
+	coinnumber = stod(argv[8]);
 	LOGGER(ls::INFO) << "rate: " << rate << ls::endl;
 //	getPrice();
 //	cout << buy("GALAUSDT", 0.08, 200) << endl;
 //	cout << sell("ARUSDT", 90, 0.3) << endl;
 //	cout << getBuyOrderNumber("GALAUSDT") << endl;
-	method();
+	method(coinname, coinnumber);
 }
