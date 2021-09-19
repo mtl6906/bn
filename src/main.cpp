@@ -55,7 +55,8 @@ string transacation(const string &method, const string &url, const string &body 
 	LOGGER(ls::INFO) << "cmd sending..." << ls::endl;
 
 	in.reset(connection -> getReader());
-	in.split("\r\n\r\n");
+	in.read();
+	in.split("\r\n\r\n", true);
 	return in.split();
 }
 
