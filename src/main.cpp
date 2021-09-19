@@ -54,26 +54,29 @@ string transacation(const string &method, const string &url, const string &body 
 	io::InputStream in(connection -> getReader(), new Buffer());
 
 
+	http::Response response;
 	for(;;)
 	{
 		in.read();
 		LOGGER(ls::INFO) << "reading..." << ls::endl;
-		string responseText;
-		try
+		if(response.getCode() == "")
 		{
-			responseText = in.split("\r\n\r\n", true);
+			try
+			{
+				string responseText = in.split("\r\n\r\n", true);
+				response.parseFrom(responseText);
+			}
+			catch(Exception &e)
+			{
+				sleep(1);
+				continue;	
+			}
 		}
-		catch(Exception &e)
-		{
-			sleep(1);
-			continue;	
-		}
-		http::Response response;
-		response.parseFrom(responseText);
 		auto contentLength = stoi(response.getAttribute("Content-Length"));
 		try
 		{
-			return in.split(contentLength);
+			auto text = in.split(contentLength);
+			return text;
 		}
 		catch(Exception &e)
 		{
