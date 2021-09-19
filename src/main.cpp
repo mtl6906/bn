@@ -21,6 +21,7 @@ using namespace std;
 char *ip, *url, *secretKey, *apiKey, *coinname;
 double rate, uprate;
 double coinnumber;
+ssl::Client sslClient;
 
 io::InputStream in(nullptr, new Buffer());
 io::OutputStream out(nullptr, new Buffer());
@@ -39,7 +40,6 @@ string transacation(const string &method, const string &url, const string &body 
 		request.setAttribute("Content-Length", to_string(body.size()));
 	for(auto &attribute : attributes)
 		request.setAttribute(attribute.first, attribute.second);
-	ssl::Client sslClient;
 	unique_ptr<ssl::Connection> connection(sslClient.getConnection(net::Client(ip, 443).connect()));
 	connection -> setHostname(url);
 	connection -> connect();
