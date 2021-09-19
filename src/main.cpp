@@ -22,6 +22,9 @@ char *ip, *url, *secretKey, *apiKey, *coin;
 double rate, uprate;
 double number;
 
+io::InputStream in(nullptr, new Buffer());
+io::OutputStream out(nullptr, new Buffer());
+
 string transacation(const string &method, const string &url, const string &body = "", const map<string, string> &attributes = map<string, string>())
 {
 	http::Request request;
@@ -41,7 +44,7 @@ string transacation(const string &method, const string &url, const string &body 
 	connection -> setHostname(url);
 	connection -> connect();
 	
-	io::OutputStream out(connection -> getWriter(), new Buffer());
+	out.reset(connection -> getWriter());
 	string text = request.toString();
 	
 	LOGGER(ls::INFO) << "request:\n" << text << ls::endl;
@@ -51,8 +54,7 @@ string transacation(const string &method, const string &url, const string &body 
 
 	LOGGER(ls::INFO) << "cmd sending..." << ls::endl;
 
-	io::InputStream in(connection -> getReader(), new Buffer());
-
+	in.reset(connection -> getReader());
 
 	http::Response response;
 	for(;;)
@@ -65,6 +67,7 @@ string transacation(const string &method, const string &url, const string &body 
 			{
 				string responseText = in.split("\r\n\r\n", true);
 				response.parseFrom(responseText);
+				LOGGER(ls::INFO) << "parse header ok" << ls::endl;
 			}
 			catch(Exception &e)
 			{
