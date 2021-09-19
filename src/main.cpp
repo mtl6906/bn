@@ -1,4 +1,5 @@
 #include "ls/http/Request.h"
+#include "ls/http/Response.h"
 #include "ls/http/QueryString.h"
 #include "ls/io/InputStream.h"
 #include "ls/io/OutputStream.h"
@@ -50,12 +51,36 @@ string transacation(const string &method, const string &url, const string &body 
 	LOGGER(ls::INFO) << "cmd sending..." << ls::endl;
 
 	io::InputStream in(connection -> getReader(), new Buffer());
-	in.read();
 
-	LOGGER(ls::INFO) << "reading..." << ls::endl;
 
-	in.split("\r\n\r\n", true);
-	return in.split();
+	for(;;)
+	{
+		in.read();
+		LOGGER(ls::INFO) << "reading..." << ls::endl;
+		string responseText;
+		try
+		{
+			responseText = in.split("\r\n\r\n", true);
+		}
+		catch(Exception &e)
+		{
+			sleep(1);
+			continue;	
+		}
+		http::Response response;
+		response.parseFrom(responseText);
+		auto contentLength = stoi(response.getAttribute("Content-Length"));
+		try
+		{
+			return in.split(contentLength);
+		}
+		catch(Exception &e)
+		{
+			
+		}
+		sleep(1);
+	}
+	return "";
 }
 
 vector<double> getPrice(const string &coin)
@@ -182,8 +207,6 @@ void method()
 		}
 	}
 }
-
-
 
 int main(int argc, char **argv)
 {
